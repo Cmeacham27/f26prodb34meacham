@@ -4,26 +4,31 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
-// Load environment variables from .env file
+// 1. Environment & Mongoose Setup
 require('dotenv').config();
-const connectionString = process.env.MONGO_CON;
 const mongoose = require('mongoose');
+const connectionString = process.env.MONGO_CON;
 mongoose.connect(connectionString);
 
-// Get the default connection and check for errors/success
+// Get default connection
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
-db.once("open", function(){	
-  console.log("Connection to DB succeeded");
+db.once('open', function() {
+    console.log("Connection to DB succeeded");
 });
 
+// Import Dragon Model
+var Dragon = require('./models/dragon');
+
+// Routers setup
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-var resourceRouter = require('./routes/resource'); // Resource router for API endpoints
+var resourceRouter = require('./routes/resource');
+var dragonRouter = require('./routes/dragon');
 
 var app = express();
 
-// view engine setup
+// View engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
@@ -33,55 +38,43 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
-app.use('/resource', resourceRouter); // Mount resource router
+// Database seeding function (Part 5)
+async function recreateDB(){
+    await Dragon.deleteMany();
+    
+    let instance1 = new Dragon({ kind: "fire", wings: true, teeth: 64 });
+    let instance2 = new Dragon({ kind: "ice", wings: false, teeth: 32 });
+    let instance3 = new Dragon({ kind: "poison", wings: true, teeth: 128 });
 
-// Import model and seed database on startup
-var Costume = require("./models/costume");
-
-async function recreateDB(){  
-  await Costume.deleteMany();  
-  
-  let instance1 = new Costume({costume_type:"ghost", size:'large', cost:15.4});  
-  instance1.save().then(doc => {    
+    await instance1.save();
     console.log("First object saved");
-  }).catch(err => {    
-    console.error(err);
-  });
-
-  let instance2 = new Costume({costume_type:"witch", size:'medium', cost:20.0});  
-  instance2.save().then(doc => {    
+    await instance2.save();
     console.log("Second object saved");
-  }).catch(err => {    
-    console.error(err);
-  });
-
-  let instance3 = new Costume({costume_type:"goblin", size:'small', cost:12.5});  
-  instance3.save().then(doc => {    
+    await instance3.save();
     console.log("Third object saved");
-  }).catch(err => {    
-    console.error(err);
-  });
 }
 
 let reseed = true;
 if (reseed) {
-  recreateDB();
+    recreateDB();
 }
 
-// catch 404 and forward to error handler
+// Mount routes
+app.use('/', indexRouter);
+app.use('/users', usersRouter);
+app.use('/resource', resourceRouter);
+app.use('/dragons', dragonRouter);
+
+// Catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
 });
 
-// error handler
+// Error handler
 app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-  // render the error page
   res.status(err.status || 500);
   res.render('error');
 });
