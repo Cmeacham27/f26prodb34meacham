@@ -20,7 +20,7 @@ exports.dragon_view_all_Page = async function(req, res) {
     }
 };
 
-// Handle Dragon create on POST (Part 7 preview)
+// Handle Dragon create on POST (Part 7)
 exports.dragon_create_post = async function(req, res) {
     console.log(req.body);
     let document = new Dragon();
@@ -35,13 +35,22 @@ exports.dragon_create_post = async function(req, res) {
     }
 };
 
-// Stubs for other actions
-exports.dragon_detail = function(req, res) {
-    res.status(500).send('NOT IMPLEMENTED: Dragon detail');
+// Handle a specific dragon detail/inspect view (Part 8)
+exports.dragon_detail = async function(req, res) {
+    console.log("detail " + req.query.id);
+    try {
+        let result = await Dragon.findById(req.query.id);
+        res.render('dragondetail', { title: 'Dragon Detail', toShow: result });
+    } catch (err) {
+        res.status(500).send(`{'error': '${err}'}`);
+    }
 };
+
+// Stubs for other actions
 exports.dragon_delete = function(req, res) {
     res.status(500).send('NOT IMPLEMENTED: Dragon delete');
 };
+
 exports.dragon_update_put = function(req, res) {
     res.status(500).send('NOT IMPLEMENTED: Dragon update');
 };

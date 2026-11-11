@@ -1,0 +1,26 @@
+extends layout
+
+block content
+  h1= title
+
+  if (toShow == null)
+    h2 No instance to show details
+  else
+    - let dragonid = toShow._id
+    - let kind = toShow.kind
+    - let wings = toShow.wings
+    - let teeth = toShow.teeth
+    
+    div
+      div.row
+        div.dragon-attr.mr-3 Dragon ID is:
+        div #{dragonid}
+      div.row
+        div.dragon-attr.mr-3 Dragon Kind is:
+        div #{kind}
+      div.row
+        div.dragon-attr.mr-3 Dragon Wings is:
+        div #{wings}
+      div.row
+        div.dragon-attr.mr-3 Dragon Teeth is:
+        div #{teeth}

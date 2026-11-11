@@ -5,8 +5,27 @@ block content
   
   div(class="container-fluid")
     div(class="row m-1")
+      //- Button at the top to add a new document
+      div(class="row")
+        button.btn.btn-success.ml-1(parsley-type="button", class="btn-success m-2", onclick="dispatch('/dragons/create')") Create New Dragon
+
+    div(class="row m-1")
       each item in results
-        div(class="col-sm-2 m-1" style="border: 1px solid #dee2e6; border-radius: 5px; padding: 15px;")
+        - let destination = `dispatch(\"/dragons/detail?id=${item._id}\")`
+        - let updateDestination = `dispatch(\"/dragons/update?id=${item._id}\")`
+        - let deleteDestination = `dispatch(\"/dragons/delete?id=${item._id}\")`
+        
+        div(class="col-sm-4 m-1" style="border: 1px solid #dee2e6; border-radius: 5px; padding: 15px;")
           p **Kind:** #{item.kind}
           p **Wings:** #{item.wings}
           p **Teeth:** #{item.teeth}
+          
+          div(class="row mt-2")
+            button.btn.btn-primary.ml-1(class="btn-primary m-1", onclick=destination) Detail
+            button.btn.btn-warning.ml-1(class="btn-warning m-1", onclick=updateDestination) Update
+            button.btn.btn-danger.ml-1(class="btn-danger m-1", onclick=deleteDestination) Delete
+
+  script.
+    function dispatch(path){
+      window.location.href = path
+    }
